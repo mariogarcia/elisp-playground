@@ -2,9 +2,11 @@
 ;;; Code:
 ;;; Commentary:
 
-(defun specific-window (n)
+(defun specific-window (&optional n) ;; make n optional
   "Select a specific window with order N."
-  (other-window n))
+  (if n
+      (other-window n)
+    (other-window 1)))
 
 (defun other-window-backwards ()
   "Select the previous window."
@@ -14,26 +16,24 @@
 (defun other-window-forwards ()
   "Select the next window."
   (interactive)
-  (specific-window 1))
+  (specific-window))
+
+(defun say-hello (name)
+  "Say hello to a person with name NAME."
+  (let ((message (format "Hello %s \n" name)))
+    (insert message)))
 
 (defun write-names-other-window ()
   "Write a list of names in new window."
+  (interactive)
   (let ((names '("David" "Kirk" "Henry")))
-    (switch-to-buffer-other-window "*test*") ;; Moves to another window
-    (goto-char (point-min))                  ;; Goes to the beginning of the window buffer
-    (mapc 'insert names))                    ;; Inserts all names
-    (specific-window 1))                     ;; Goes back to first window
+    (switch-to-buffer-other-window "*test*")
+    (erase-buffer)
+    (goto-char (point-min))
+    (mapc 'say-hello names))
+    (other-window-forwards))
 
-;;;(defun boldify-names ()
-;;;  "Boldify everything."
-;;;  (interactive)
-;;;  (switch-to-buffer-other-window "*test*")
-;;;  (goto-char (point-min))
-;;;  (while (re-search-forward "bonjour \\(.+\\)!" nil 't)
-;;;    (add-text-properties (match-beginning 1)
-;;;                         (match-end 1)
-;;;                         (list 'face 'bold)))
-;;;  (other-window 1))
+(write-names-other-window)
 
 (global-set-key "\C-x\C-p" 'other-window-backward)
 
