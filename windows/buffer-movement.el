@@ -30,8 +30,14 @@
     (erase-buffer)
     (goto-char (point-min))
     (mapc 'say-hello names))
-    (other-window-forwards))
+  (other-window-forwards))
+
+(defun line-to-top ()
+  "Move current line to top of window."
+  (interactive)
+  (recenter 0))
 
 (global-set-key "\C-x\C-p" 'other-window-backward)
+(global-set-key "\M-!" 'line-to-top)
 
 ;;; buffer-movement.el ends here
