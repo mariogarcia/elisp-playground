@@ -4,9 +4,8 @@
 
 (defun specific-window (&optional n) ;; make n optional
   "Select a specific window with order N."
-  (if n
-      (other-window n)
-    (other-window 1)))
+  (let ((number (or n 1)))
+    (other-window number)))
 
 (defun other-window-backwards ()
   "Select the previous window."
@@ -32,8 +31,6 @@
     (goto-char (point-min))
     (mapc 'say-hello names))
     (other-window-forwards))
-
-(write-names-other-window)
 
 (global-set-key "\C-x\C-p" 'other-window-backward)
 
