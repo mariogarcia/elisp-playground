@@ -20,4 +20,15 @@
          (charpos (/ (* size pct) 100)))
     (goto-char charpos)))
 
+(defun count-lines-buffer ()
+  "Count how many lines there are in the buffer."
+  (interactive)
+  (let ((count 1))
+    (save-excursion
+      (goto-char (point-min))
+      (while (< (point) (point-max))
+        (re-search-forward "\n")
+        (setq count (1+ count)))
+      (message "buffer countains %d lines." count))))
+
 ;;; utils.el ends here
