@@ -2,7 +2,7 @@
 ;;; Code:
 ;;; Commentary:
 
-(defun count-words-buffer ()
+(defun ce-count-words-buffer ()
   "Count words in a buffer."
   (interactive)
   (let ((count 0))
@@ -13,14 +13,22 @@
         (setq count (1+ count)))
       (message "buffer cointains %d words." count))))
 
-(defun goto-percent (pct)
+(defun ce-count-words-region ()
+  "Count words in a defined region."
+  (interactive)
+  (let* ((start (region-beginning))
+        (end (region-end))
+        (count (how-many "\\w+" start end)))
+    (message "region countains %d words" count)))
+
+(defun ce-goto-percent (pct)
   "Move cursor to a specific percentage (indicated by PCT) of the buffer."
   (interactive "nGoto percent: ")
   (let* ((size (point-max))
          (charpos (/ (* size pct) 100)))
     (goto-char charpos)))
 
-(defun count-lines-buffer ()
+(defun ce-count-lines-buffer ()
   "Count how many lines there are in the buffer."
   (interactive)
   (let ((count 1))
