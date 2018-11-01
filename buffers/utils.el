@@ -43,4 +43,35 @@
         (setq count (1+ count)))
       (message "buffer countains %d lines." count))))
 
+(defun ce-what-line ()
+  "Tell which line I am at."
+  (interactive)
+  (let ((current-point (point))
+        (count 0))
+    (save-excursion
+      (goto-char (point-min))
+      (while (<= (point) current-point)
+        (re-search-forward "\n")
+        (setq count (1+ count)))
+      (message "you are at line %d." count))))
+
+(defun ce-count-lines-until (condition)
+  "Count lines until CONDITION is met."
+  (let ((count 0))
+    (save-excursion
+      (goto-char (point-min))
+      (while (funcall condition (point))
+        (re-search-forward "\n")
+        (setq count (1+ count)))
+      count)))
+
+(defun ce-what-line-2 ()
+  "Tell which line I am at refactored."
+  (interactive)
+  (let* ((current-point (point))
+         (line-no (ce-count-lines-until
+                   (lambda (p)
+                     (<= (point) current-point)))))
+    (message "you are at line %d." line-no)))
+
 ;;; utils.el ends here
