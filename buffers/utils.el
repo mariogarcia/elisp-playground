@@ -13,12 +13,16 @@
         (setq count (1+ count)))
       (message "buffer cointains %d words." count))))
 
+(defun ce-count-words (from to)
+  "Count words FROM TO."
+  (how-many "\\w+" from to))
+
 (defun ce-count-words-region ()
   "Count words in a defined region."
   (interactive)
   (let* ((start (region-beginning))
         (end (region-end))
-        (count (how-many "\\w+" start end)))
+        (count (ce-count-words start end)))
     (message "region countains %d words" count)))
 
 (defun ce-goto-percent (pct)
