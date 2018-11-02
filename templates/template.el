@@ -2,22 +2,51 @@
 ;;; Code:
 ;;; Commentary:
 
-(defvar template-file-name "file-template"
+(defvar template-file-name "template-file"
   "*The name of the file to look for when a 'find-file' request fails.")
 
 (defvar template-replacements-alist
   '(("%filename%" . (lambda ()
-                      (file-name-nondirectory (buffer-file-name)))))
+                      (file-name-nondirectory (buffer-file-name))))
+    ("%classname%" . (lambda ()
+                       (file-name-nondirectory (file-name-sans-extension (buffer-file-name)))))
+    ("%package%" . (lambda ()
+                     (template-insert-package (buffer-file-name))))
+    ("%author%" . user-full-name))
   "A list which specifies what substitutions to perform.")
+
+(defun template-insert-package (file-name)
+  "Insert package from FILE-NAME."
+  (let ((pwd (file-name-directory file-name))
+        (ext (file-name-extension file-name))
+        result)
+    (cond ((equal ext "groovy")
+           (resolve-groovy-package pwd))
+          (t
+           ""))))
+
+(defun resolve-groovy-package (name)
+  "Resolve Groovy file package from NAME."
+  (let (result)
+    (if (string-match "/\\(com\\|org\\|net\\)/.*/$" name)
+        (progn
+          (setq result (substring name (+ (match-beginning 0) 1)
+                                  (- (match-end 0) 1)))
+          (while (string-match "/" result)
+            (setq result (concat (substring result 0 (match-beginning 0))
+                                 "."
+                                 (substring result (match-end 0)))))
+          result)
+      "")))
 
 (defun find-template-file ()
   "Search the current directory and its parents for a file matching the name configured for template files."
-  (let ((path (file-name-directory (buffer-file-name)))
-        (ext (file-name-extension (buffer-file-name)))
-        attempt result)
+  (let* ((file-name (buffer-file-name))
+         (path (file-name-directory file-name))
+         (ext (file-name-extension file-name))
+         attempt result)
     (while (and (not result) (> (length path) 0))
       (setq attempt (concat path template-file-name "-" ext))
-      (message "finding %s" attempt)
       (if (file-readable-p attempt)
           (setq result attempt)
         (setq path (if (string-equal path "/")
