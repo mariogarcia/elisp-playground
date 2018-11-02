@@ -6,12 +6,9 @@
   "*The name of the file to look for when a 'find-file' request fails.")
 
 (defvar template-replacements-alist
-  '(("%filename%" . (lambda ()
-                      (file-name-nondirectory (buffer-file-name))))
-    ("%classname%" . (lambda ()
-                       (file-name-nondirectory (file-name-sans-extension (buffer-file-name)))))
-    ("%package%" . (lambda ()
-                     (template-insert-package (buffer-file-name))))
+  '(("%filename%" . (lambda () (file-name-nondirectory (buffer-file-name))))
+    ("%classname%" . (lambda () (file-name-nondirectory (file-name-sans-extension (buffer-file-name)))))
+    ("%package%" . (lambda () (template-insert-package (buffer-file-name))))
     ("%author%" . user-full-name))
   "A list which specifies what substitutions to perform.")
 
@@ -20,21 +17,24 @@
   (let ((pwd (file-name-directory file-name))
         (ext (file-name-extension file-name))
         result)
-    (cond ((equal ext "groovy")
-           (resolve-groovy-package pwd))
+    (cond ((member ext '("groovy" "java"))
+           (resolve-jvm-package ext pwd))
           (t
            ""))))
 
-(defun resolve-groovy-package (name)
-  "Resolve Groovy file package from NAME."
-  (let (result)
-    (if (string-match "src/main/groovy/" name)
+(defun resolve-jvm-package (lang name)
+  "Resolve LANG file package from NAME."
+  (let ((pkg (concat "src/main/" lang "/"))
+        (result))
+    (if (string-match pkg name)
         (progn
           (setq result (substring name (match-end 0)))
           (while (string-match "/" result)
-            (setq result (concat (substring result 0 (match-beginning 0))
-                                 "."
-                                 (substring result (match-end 0)))))
+            (setq result (concat
+                          "package "
+                          (substring result 0 (match-beginning 0))
+                          "."
+                          (substring result (match-end 0)))))
           result)
       "")))
 
