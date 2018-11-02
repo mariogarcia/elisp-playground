@@ -28,10 +28,9 @@
 (defun resolve-groovy-package (name)
   "Resolve Groovy file package from NAME."
   (let (result)
-    (if (string-match "/\\(com\\|org\\|net\\)/.*/$" name)
+    (if (string-match "src/main/groovy/" name)
         (progn
-          (setq result (substring name (+ (match-beginning 0) 1)
-                                  (- (match-end 0) 1)))
+          (setq result (substring name (match-end 0)))
           (while (string-match "/" result)
             (setq result (concat (substring result 0 (match-beginning 0))
                                  "."
