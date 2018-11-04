@@ -2,7 +2,7 @@
 ;;; Code:
 ;;; Commentary:
 
-(require 'ert)
+(require 'seq)
 
 (defvar template-file-name "template-file"
   "*The name of the file to look for when a 'find-file' request fails.")
@@ -24,26 +24,39 @@
           (t
            ""))))
 
-(defun resolve-jvm-package (lang name)
-  "Resolve LANG file package from NAME."
-  (let ((pkg (concat "src/main/" lang "/"))
-        (result))
-    (if (string-match pkg name)
-        (progn
-          (setq result (substring name (match-end 0)))
-          (while (string-match "/" result)
-            (setq result (concat
-                          (substring result 0 (match-beginning 0))
-                          "."
-                          (substring result (match-end 0)))))
-          (concat "package " result))
+(ert-deftest test-template-insert-package ()
+  (should (equal (template-insert-package "/home/x/A.java") ""))
+  (should (equal (template-insert-package "/home/x/A.groovy") ""))
+  (should (equal (template-insert-package "/home/x/src/main/java/io/xxx/A.java") "package io.xxx"))
+  (should (equal (template-insert-package "/home/x/src/main/groovy/io/xxx/A.groovy") "package io.xxx")))
+
+(defun resolve-jvm-package (lang path)
+  "Resolve LANG file package from PATH."
+  (let ((convention (concat "src/main/" lang "/")))
+    (if (string-match convention path)
+        (let*
+            ((result (substring path (match-end 0)))
+             (list (ce-filter-empty-or-nil-string (split-string result "/")))
+             (pkg (ce-string-join list ".")))
+             (concat "package " pkg))
       "")))
 
 (ert-deftest test-resolve-jvm-package ()
-  "Test package is correct in a Groovy-Gradle like project."
-  (let* ((path "/home/name/a/src/main/groovy/io/xxx/core")
-         (result (resolve-jvm-package "groovy" path)))
-    (should (equal result "package io.xxx.core"))))
+  (should (equal (resolve-jvm-package "java" "/a/b/c/src/main/java/io/xxx/core") "package io.xxx.core"))
+  (should (equal (resolve-jvm-package "java" "/a/b/c/src/main/java/io/xxx/core/") "package io.xxx.core")))
+
+(defun ce-filter-empty-or-nil-string (list)
+  "Filter nil and empty strings from LIST."
+  (seq-filter (lambda (x)
+                (not (or
+                      (equal "" x)
+                      (not x)
+                      )))
+              list))
+
+(defun ce-string-join (list sep)
+  "Join LIST with SEP."
+  (mapconcat 'identity list sep))
 
 (defun find-template-file ()
   "Search the current directory and its parents for a file matching the name configured for template files."
