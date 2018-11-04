@@ -2,6 +2,8 @@
 ;;; Code:
 ;;; Commentary:
 
+(require 'ert)
+
 (defvar template-file-name "template-file"
   "*The name of the file to look for when a 'find-file' request fails.")
 
@@ -31,12 +33,17 @@
           (setq result (substring name (match-end 0)))
           (while (string-match "/" result)
             (setq result (concat
-                          "package "
                           (substring result 0 (match-beginning 0))
                           "."
                           (substring result (match-end 0)))))
-          result)
+          (concat "package " result))
       "")))
+
+(ert-deftest test-resolve-jvm-package ()
+  "Test package is correct in a Groovy-Gradle like project."
+  (let* ((path "/home/name/a/src/main/groovy/io/xxx/core")
+         (result (resolve-jvm-package "groovy" path)))
+    (should (equal result "package io.xxx.core"))))
 
 (defun find-template-file ()
   "Search the current directory and its parents for a file matching the name configured for template files."
